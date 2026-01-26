@@ -1,0 +1,17 @@
+# Build artifacts
+**/bin/
+**/obj/
+
+# User-specific files
+**/*.user
+**/*.suo
+**/*.userosscache
+**/*.sln.docstates
+**/.vs
+
+# Local settings / secrets
+**/appsettings.Development.json
+**/.env
+
+# Docker volumes / local data (if any)
+**/pgdata/
