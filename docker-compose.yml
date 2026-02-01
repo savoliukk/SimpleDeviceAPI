@@ -6,14 +6,23 @@ services:
       POSTGRES_USER: app
       POSTGRES_PASSWORD: app
       POSTGRES_DB: devices
+    ports:
+      - "15432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d devices"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
 
   api:
     image: simpledeviceapi:local
+    build: .
     container_name: simpledevice-api
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ConnectionStrings__Default: Host=postgres;Port=5432;Database=devices;Username=app;Password=app
@@ -23,6 +32,8 @@ services:
   migrate:
     image: mcr.microsoft.com/dotnet/sdk:8.0
     working_dir: /src
+    profiles:
+      - tools
     volumes:
       - ./:/src
     depends_on:
