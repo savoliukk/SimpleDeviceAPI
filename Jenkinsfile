@@ -1,23 +1,17 @@
-pipeline {                     
-    agent any  // run on any available agent
+stage('SSH deploy key check') {
+  steps {
+    sshagent(credentials: ['github-deploy-key']) {
+      sh '''
+        set -euxo pipefail
+        mkdir -p ~/.ssh
+        chmod 700 ~/.ssh
 
-    stages {
-        stage('Build') {  // build stage
-            steps {
-                sh 'echo Building Project'
-            }
-        }
+        ssh-keyscan -H github.com >> ~/.ssh/known_hosts
+        chmod 600 ~/.ssh/known_hosts
 
-        stage('Test') {  // test stage
-            steps {
-                sh 'echo Running Tests'
-            }
-        }
-
-        stage('Deploy') {  // deploy stage
-            steps {
-                sh 'echo Deploying Application'
-            }
-        }
+        # Перевірка, що ключ реально працює (GitHub не дає shell, це нормально)
+        ssh -T git@github.com || true
+      '''
     }
+  }
 }
